@@ -5,6 +5,7 @@
 int main() {
     Stack s;
 
+    
     // Stack initialization
     initStack(&s);
     assert(size(&s) == 0);
@@ -38,6 +39,17 @@ int main() {
     assert(isEmpty(&s) == true);
 
 
-    // Freeing memory
-    freeStack(&s);
+    // Stress test: push and pop many elements
+    initStack(&s);
+    int N = 1000;
+    for (int i = 0; i < N; ++i) {
+        push(&s, i);
+    }
+    assert(size(&s) == N);
+    for (int i = N - 1; i >= 0; --i) {
+        assert(pop(&s) == i);
+    }
+    assert(isEmpty(&s));
+
+    return 0;
 }
