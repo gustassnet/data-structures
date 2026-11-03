@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 #include "vector.h"
 
@@ -101,5 +102,8 @@ int main() {
     // Freeing memory
     freeVector(&v2);
     freeVector(&v);
+
+    printf("All vector tests passed!\n");
+
     return 0;
 }

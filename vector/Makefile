@@ -8,4 +8,4 @@ Vector.o: Vector.c Vector.h
 	gcc -std=c99 -c Vector.c
 
 clean:
-	del /q *.o test.exe
+	rm -f *.o test.exe
