@@ -1,147 +1,230 @@
-# Vektoriaus (Vector) Implementacija C kalba
+# Vector implementation in C language
 
-## Įvadas
+## 1. Introduction
 
-Šiame dokumente aprašoma vektoriaus (dynamic array) realizacija C kalba. Pateikiamos pagrindinės funkcijos, jų aprašymas ir naudojimas, taip pat paaiškinama, kaip modifikuoti kodą, kad būtų palaikomi įvairūs duomenų tipai.
+This document describes the implementation of a vector (dynamic array) in the C language. It presents the core functions, their descriptions and usage. It explains how to modify the code to support various data types.
 
-## Funkcijų aprašymas
+## 2. Features
 
-### 1. `void initVector(vector *v, size_t capacity)`
+- Dynamic array initialization using dynamically allocated memory.
+- Automatic capacity doubling when the vector becomes full.
+- Automatic capacity reduction when the number of elements reaches half of the allocated capacity.
+- Adding elements to the end of the vector.
+- Inserting and removing elements at specified indices.
+- Accessing and modifying elements.
+- Creating copies of vectors.
+- Checking vector `size`, `capacity` status and whether it is empty.
+- Clearing the vector and freeing allocated memory.
+- Configurable element type through the `Item_type` definition.
 
-**Aprašymas:** Sukuria vektorių su nurodyta pradine talpa.  
-**Naudojimas:**
+## 3. Implementation Details
 
+The vector is implemented using a dynamically allocated array. It has three properties:
+
+`items` – pointer to the first item of dynamically allocated memory.
+
+`size` – current number of elements stored in the vector.
+
+`capacity` – total number of elements that can currently be stored.
+
+### Memory Allocation and Resizing
+
+Memory is allocated dynamically using `malloc()` and `realloc()`.
+
+**Growing:** When the vector reaches its capacity, the allocated capacity is doubled.
+
+**Shrinking:** When elements are removed and the vector size reaches half of its capacity, the allocated memory is reduced by half.
+
+**Memory cleanup:** When the vector becomes empty, its allocated memory is released.
+
+## 4. Functions Documentation
+
+### 1. `void initVector(vector *v)`
+
+**Description:** Initializes an empty vector with an initial capacity of zero.
+
+**Usage:**
 ```c
 vector v;
-initVector(&v, 10);  // Sukuriama vektorius su 10 elementų talpa
+initVector(&v);
 ```
 
 ### 2. `void freeVector(vector *v)`
 
-**Aprašymas:** Atlaisvina visą vektoriaus užimtą atmintį.  
-**Naudojimas:**
+**Description:** Frees all memory allocated for the vector and resets its properties.
 
+**Usage:**
 ```c
 freeVector(&v);
 ```
 
-### 3. `int getSize(vector *v)`
+### 3. `size_t getSize(vector *v)`
 
-**Aprašymas:** Grąžina vektoriaus elementų skaičių.<br>
-**Naudojimas:**
+**Description:** Returns the current number of elements stored in the vector.
 
+**Usage:**
 ```c
-printf("Vektoriaus dydis: %d\n", getSize(&v));
+printf("Vector size: %zu\n", getSize(&v));
 ```
 
 ### 4. `bool isEmpty(vector *v)`
 
-**Aprašymas:** Patikrina, ar vektorius yra tuščias. Grąžina true, jei vektorius tuščias, priešingu atveju – false.
-<br>
-**Naudojimas:**
+**Description:** Checks whether the vector is empty. Returns `true` if the vector contains no elements; otherwise, returns `false`.
 
+**Usage:**
 ```c
 if (isEmpty(&v)) {
-    printf("Vektorius tuščias\n");
+    printf("The vector is empty.\n");
 }
 ```
 
 ### 5. `bool isFull(vector *v)`
 
-**Aprašymas:** Patikrina, ar vektorius yra pilnas. Grąžina true, jei vektorius pilnas, priešingu atveju – false.
-<br>
-**Naudojimas:**
+**Description:** Checks whether the vector has reached its current capacity. Returns `true` if the vector is full; otherwise, returns `false`.
 
+**Usage:**
 ```c
 if (isFull(&v)) {
-    printf("Vektorius pilnas\n");
+    printf("The vector is full.\n");
 }
 ```
 
 ### 6. `char* toString(vector *v)`
 
-**Aprašymas:** Grąžina visus vektoriaus elementus.
-<br>
-**Naudojimas:**
+**Description:** Converts the vector's elements into a string and returns a pointer to the resulting string. The caller is responsible for freeing the allocated memory.
 
+**Usage:**
 ```c
-toString(&v);
+char *str = toString(&v);
+printf("%s\n", str);
+free(str);
 ```
 
 ### 7. `void cloneVector(vector *v, vector *dest)`
 
-**Aprašymas:** Sukuria vektoriaus kopiją.<br>
-**Naudojimas:**
+**Description:** Creates an independent copy of the source vector and stores it in the destination vector.
 
+**Usage:**
 ```c
-cloneVector(&v1, &v2);  // v1 vektoriaus elementai nukopijuojami į v2 vektorių
+vector v2;
+initVector(&v2);
+
+cloneVector(&v1, &v2);
 ```
 
 ### 8. `void makeEmpty(vector *v)`
 
-**Aprašymas:** Pašalina visus vektoriaus elementus.<br>
-**Naudojimas:**
+**Description:** Removes all elements from the vector by resetting its size to zero. The allocated capacity is preserved.
 
+**Usage:**
 ```c
 makeEmpty(&v);
 ```
 
 ### 9. `void addElement(vector *v, Item_type item)`
 
-**Aprašymas:** Prideda naują elementą į vektorių. Jei vektorius pasiekia savo talpą, jis automatiškai padvigubina savo talpą.<br>
-**Naudojimas:**
+**Description:** Appends a new element to the end of the vector. If the vector reaches its capacity, the capacity is automatically doubled.
 
+**Usage:**
 ```c
 addElement(&v, 10);
 addElement(&v, 20);
 ```
 
-### 10. `void setElementAt(vector *v, size_t index, Item_type item)`
+### 10. `void setElementAt(vector *v, ssize_t index, Item_type item)`
 
-**Aprašymas:** Nustato elementą reikšmę pagal nurodytą indeksą. Jei indeksas yra neteisingas, nieko nedaro.<br>
-**Naudojimas:**
+**Description:** Updates the value of an element at the specified index. If the index is invalid, an error message is printed and the program terminates.
 
+**Usage:**
 ```c
 setElementAt(&v, 0, 30);
 ```
 
-### 11. `Item_type getElementAt(vector *v, size_t index)`
+### 11. `Item_type getElementAt(vector *v, ssize_t index)`
 
-**Aprašymas:** Grąžina elementą pagal nurodytą indeksą. <br>
-**Naudojimas:**
+**Description:** Returns the element stored at the specified index. If the index is invalid, an error message is printed and the program terminates.
 
+**Usage:**
 ```c
-printf("Elementas: %d\n", getElementAt(&v, 0));
+printf("Element: %d\n", getElementAt(&v, 0));
 ```
 
-### 12. `void removeElementAt(vector *v, size_t index)`
+### 12. `void removeElementAt(vector *v, ssize_t index)`
 
-**Aprašymas:** Pašalina elementą pagal nurodytą indeksą ir pertvarko likusius elementus. <br>
-**Naudojimas:**
+**Description:** Removes the element at the specified index and shifts the remaining elements to fill the gap. If the vector becomes empty, its allocated memory is freed. If its size reaches half of its capacity, the capacity is reduced by half.
 
+**Usage:**
 ```c
 removeElementAt(&v, 1);
 ```
 
-### 13. `void insertElementAt(vector *v, size_t index, Item_type item)`
+### 13. `void insertElementAt(vector *v, ssize_t index, Item_type item)`
 
-**Aprašymas:** Įterpia elementą į nurodytą vietą vektoriuje. Jei vektorius pasiekia savo talpą, jis automatiškai padvigubina savo talpą. <br>
-**Naudojimas:**
+**Description:** Inserts an element at the specified index, shifting the subsequent elements to make room. If the vector reaches its capacity, the capacity is automatically doubled.
 
+**Usage:**
 ```c
 insertElementAt(&v, 1, 15);
 ```
 
-## Kaip pritaikyti kodą skirtingiems duomenų tipams
+## 5. Data type configuration
 
-Šiuo metu vektorius saugo sveikojo (`int`) tipo skaičius. Norint, kad priimtų kitus duomenų tipus reikia modifikuoti:
+Currently, the vector stores integers (`int`). To allow it to accept other data types, it needs to be modified:
 
-1. **Pakeisti `#define Item_type` tipą:**
+1. **Change `#define Item_type` type:**
 
 ```c
-#define Item_type int   // Keisti int į norimą tipą (pvz.: double)
+#define Item_type int   // Convert int to the desired type (example: double)
 ```
 
-2. **Atnaujinti `sprintf` formatavimo specifikatorius:**
+2. **Update `sprintf` formatting specifiers:**
 
-- `%d` → `%lf` (`double` tipui)
+- `%d` → `%lf` (`double` type)
+
+## 6. Building and Running
+
+### Option 1: Using Make
+
+Build the project:
+
+```c
+make
+```
+
+Clean compiled files:
+
+```c
+make clean
+```
+
+### Option 2: Using the Windows Script
+
+The project includes a go.cmd script that automates compilation and test execution.
+
+Run:
+
+```c
+go.cmd
+```
+
+The script:
+
+- Compiles the files using Makefile.
+- Executes the generated test.exe.
+- Redirects standard output to test.txt.
+
+## 7. Tests
+
+The project includes automated tests using the C standard library's assert.h.
+
+The tests cover:
+
+- Vector initialization.
+- Adding elements and automatic capacity growth.
+- Retrieving and modifying elements.
+- Inserting and removing elements.
+- Checking vector size and if empty/full.
+- Creating and verifying copies.
+- Clearing the vector and freeing allocated memory.
+
+If all assertions pass, the test program completes successfully without giving any errors.
